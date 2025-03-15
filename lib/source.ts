@@ -1,7 +1,13 @@
-import { docs } from '@/.source';
-import { loader } from 'fumadocs-core/source';
+import { blog, kb } from "@/.source";
+import { loader } from "fumadocs-core/source";
 
-export const source = loader({
-  baseUrl: '/docs',
-  source: docs.toFumadocsSource(),
+
+export const kbSource = loader({
+  baseUrl: "/kb",
+  source: kb.toFumadocsSource(),
+});
+
+export const blogSource = loader({
+  baseUrl: "/blog",
+  source: blog.toFumadocsSource(),
 });
