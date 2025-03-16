@@ -1,8 +1,4 @@
-import {
-  defineConfig,
-  defineDocs,
-  frontmatterSchema,
-} from "fumadocs-mdx/config";
+import { defineConfig, defineDocs, frontmatterSchema } from "fumadocs-mdx/config";
 import { z } from "zod";
 
 export const kb = defineDocs({

@@ -3,3 +3,13 @@
 @import "fumadocs-ui/css/preset.css";
 
 @source '../node_modules/fumadocs-ui/dist/**/*.js';
+
+/* If a post contains a description, it adds mb-8 to create space below it,
+   pushing the published date further down. The -mt-8 is used to counteract the 
+   added margin, bringing the published date closer to the content for a more 
+   visually balanced layout. */
+@layer utilities {
+  p + div.publishedOn {
+    @apply -mt-8;
+  }
+}
