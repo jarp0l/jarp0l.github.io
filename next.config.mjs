@@ -5,7 +5,7 @@ const withMDX = createMDX();
 /** @type {import('next').NextConfig} */
 const config = {
   reactStrictMode: true,
-  
+
   // Configure the output directory
   distDir: "out",
 
@@ -18,6 +18,9 @@ const config = {
   // images: {
   //   unoptimized: true,
   // }
+
+  // Configure the type of build output for static files
+  output: "export",
 };
 
 export default withMDX(config);

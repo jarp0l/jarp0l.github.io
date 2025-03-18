@@ -1,4 +1,14 @@
-import { kbSource } from "@/lib/source";
-import { createFromSource } from "fumadocs-core/search/server";
+import { kbSource, blogSource } from "@/lib/source";
+import { createSearchAPI } from "fumadocs-core/search/server";
 
-export const { GET } = createFromSource(kbSource);
+export const revalidate = false;
+
+export const { staticGET: GET } = createSearchAPI("advanced", {
+  indexes: [...kbSource.getPages(), ...blogSource.getPages()].map((page) => ({
+    title: page.data.title,
+    description: page.data.description,
+    url: page.url,
+    id: page.url,
+    structuredData: page.data.structuredData,
+  })),
+});

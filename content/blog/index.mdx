@@ -11,15 +11,10 @@ approaches in the past, but something always seemed to be missing. I wanted to c
 knowledge base and a blog, and I believe I've achieved that with this setup, all while maintaining a
 clean design, thanks to Fumadocs.
 
-This setup still needs some work, but I'm happy with what I have so far. One thing I want to improve
-is the search functionality. I couldn't get the search to work across both the knowledge base and
-blog posts together, so I ended up with a little hack: if you check `/app/layout.tsx`, you'll see that
-I'm using client-side rendering to search through the blog posts. This means that when rendered
-server-side, it defaults to searching the knowledge base, but when rendered client-side, it searches
-both the blog posts and the knowledge base.
+This setup still needs some work, but I'm happy with what I have so far.
 
 ## TO-DO
 
 - [ ] Populate this page with blog posts sorted in chronological order.
-- [ ] Figure out how to make the search work with both knowledge base and blog posts at the same
+- [X] Figure out how to make the search work with both knowledge base and blog posts at the same
       time.
