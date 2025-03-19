@@ -14,10 +14,11 @@ const config = {
   basePath: process.env.PAGES_BASE_PATH,
 
   // Disable server side image optimization
+  // Needed due to output: "export"
   // https://nextjs.org/docs/api-reference/next/image#unoptimized
-  // images: {
-  //   unoptimized: true,
-  // }
+  images: {
+    unoptimized: true,
+  },
 
   // Configure the type of build output for static files
   output: "export",

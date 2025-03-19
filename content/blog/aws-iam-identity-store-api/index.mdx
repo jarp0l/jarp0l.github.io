@@ -1,0 +1,167 @@
+---
+title: A Shallow Dive into AWS Identity Store API (and Other AWS APIs)
+description:
+  A shallowish dive at how to discover and call the Identity Store API using Botocore, and  how you
+  can apply the same approach to any other AWS API.
+date: 2025-03-19
+---
+
+A StackOverflow [question](https://stackoverflow.com/q/79418692/13742919) asked how to list the
+users in the AWS Identity Store using Postman. They tried to call the API in a similar way to
+calling AWS IAM APIs, but it didn't work. Since I was already working with Identity Center, I saw
+this as an opportunity to dive deeper into how it works and decided to give it a shot.
+
+This indeed turned out to be an interesting exercise. The documentation covered operations and
+request parameters well, but it lacked concrete examples and didn't provide an endpoint URL for the
+Identity Store, unlike IAM (see
+[this](https://docs.aws.amazon.com/IAM/latest/APIReference/API_ListUsers.html#API_ListUsers_Examples)
+for example). That's what made it interesting.
+
+So I found Nick Frichette's blog post on
+[A Look at AWS API Protocols](https://frichetten.com/blog/aws-api-protocols/). Nick doesn't cover
+the Identity Center or Identity Store API, but he explains how AWS API requests are structured based
+on different protocols in his blog. As he points out in the blog, all of this can be found in the
+AWS SDK codebases. That was my starting point to understand how `<insert-a-service>` API works —
+with the help of AWS SDKs!
+
+<Callout title="AWS IAM Identity Center vs Identity Store" type="info">
+  Identity Center is a service for managing user access across multiple AWS accounts and
+  applications. It provides a central place to define users, groups and permissions. <br />
+  Identity Store is what Identity Center uses to store identities or principals (i.e. users and groups)
+  information. <br />
+  For this blog, we'll focus on the Identity Store API, as it contains operations related to users
+  and groups.
+</Callout>
+
+## AWS SDKs
+
+AWS SDKs are one of the best places to start when exploring how AWS APIs work, although,
+technically, the API reference/docs should probably come first.
+
+AWS SDKs come in different flavors: Python, Go, JavaScript, etc. I chose to look at
+[Botocore](https://github.com/boto/botocore) — which sits under the hood of Boto3 (Python SDK) and
+the AWS CLI — to understand how the Identity Center API works.
+
+## Botocore - Identity Store API
+
+I'll use the Identity Store API as an example to show how you can find the information you need to
+call an AWS API in `<any-http-client>`.
+
+Here's a summary from my SO answer:
+
+### Summary
+
+To list users from AWS IAM Identity Center, you need to use the region-specific Identity Store API
+URL. This is different from how you list users in IAM.
+
+Unlike IAM, it uses POST request with a JSON body and the request syntax looks like this (assuming
+you have set the authorization headers for AWS correctly, e.g. for
+[Postman](https://learning.postman.com/docs/sending-requests/authorization/aws-signature/), or
+directly go to the AWS docs for information on signing API requests:
+[Signing AWS API requests.](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_sigv.html)):
+
+Request syntax:
+
+```bash
+POST / HTTP/1.1
+Host: identitystore.${identity_center_region}.amazonaws.com
+Content-Type: application/x-amz-json-1.1
+X-Amz-Target: AWSIdentityStore.ListUsers
+Authorization: AWS4-HMAC-SHA256 Credential=ASIAEXAMPLEEXAMPLEEX/20250319/${identity_center_region}/identitystore/aws4_request, SignedHeaders=content-type;host;x-amz-content-sha256;x-amz-date;x-amz-security-token;x-amz-target, Signature=...
+
+{
+  "IdentityStoreId": "${identity_store_id}"
+}
+```
+
+Replace `${identity_center_region}` with the region corresponding to your Identity Store ID (e.g.
+`us-east-1`) and replace `${identity_store_id}` with the Identity Store ID (e.g. `d-1234567890`).
+
+---
+
+### How do you find this?
+
+To construct an API request for Identity Store, you can refer to the following lines/snippets from
+Botocore's codebase:
+
+#### 1\. For endpoint URL
+
+The Identity Store API's endpoint URL is defined in
+[Botocore's endpoint rule set](https://github.com/boto/botocore/blob/976b8947a746663232ab8886e7224b33d862c09e/botocore/data/identitystore/2020-06-15/endpoint-rule-set-1.json#L244):
+
+```json title="botocore/data/identitystore/2020-06-15/endpoint-rule-set-1.json"
+"endpoint": {
+    "url": "https://identitystore.{Region}.amazonaws.com",  // [!code highlight]
+    "properties": {},
+    "headers": {}
+},
+```
+
+#### 2\. For request headers
+
+You can check the
+[serialization logic for JSON](https://github.com/boto/botocore/blob/976b8947a746663232ab8886e7224b33d862c09e/botocore/serialize.py#L345-L372)
+for the expected request headers:
+
+```py title="botocore/serialize.py"
+serialized['headers'] = {
+    'X-Amz-Target': target,
+    'Content-Type': f'application/x-amz-json-{json_version}',
+}
+```
+
+#### 3\. For request format
+
+The
+[service definition file](https://github.com/boto/botocore/blob/976b8947a746663232ab8886e7224b33d862c09e/botocore/data/identitystore/2020-06-15/service-2.json)
+provides metadata about the
+[request format](https://github.com/boto/botocore/blob/976b8947a746663232ab8886e7224b33d862c09e/botocore/data/identitystore/2020-06-15/service-2.json#L3-L15)
+and
+[operation](https://github.com/boto/botocore/blob/976b8947a746663232ab8886e7224b33d862c09e/botocore/data/identitystore/2020-06-15/service-2.json#L301-L306):
+
+```json title="botocore/data/identitystore/2020-06-15/service-2.json"
+"metadata": {
+    "apiVersion": "2020-06-15",
+    "endpointPrefix": "identitystore",  // [!code highlight]
+    "jsonVersion": "1.1",   // [!code highlight]
+    "protocol": "json", // [!code highlight]
+    "serviceAbbreviation": "IdentityStore",
+    "serviceFullName": "AWS SSO Identity Store",
+    "serviceId": "identitystore",
+    "signatureVersion": "v4",   // [!code highlight]
+    "signingName": "identitystore",
+    "targetPrefix": "AWSIdentityStore",  // [!code highlight]
+    "uid": "identitystore-2020-06-15"
+},
+```
+
+The `ListUsers` operation is defined with its HTTP method and path:
+
+```json title="botocore/data/identitystore/2020-06-15/service-2.json"
+"ListUsers": {
+    "name": "ListUsers",
+    "http": {
+        "method": "POST",
+        "requestUri": "/"
+    }
+}
+```
+
+So here's how we derive the request headers in this case:
+
+```bash
+Content-Type: ${protocol}-${jsonVersion}
+X-Amz-Target: ${targetPrefix}.${operations.name}
+```
+
+Substitute the placeholders with the values:
+
+```bash
+Content-Type: application/x-amz-json-1.1
+X-Amz-Target: AWSIdentityStore.ListUsers
+```
+
+Combine all the pieces and you have everything needed to construct the final request in
+`<any-http-client>`. Here's an example using Postman:
+
+![Postman example](./aws-api-request.png)
