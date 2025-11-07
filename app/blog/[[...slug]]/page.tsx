@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { blogSource } from "@/lib/source";
 import { formatDate, formatISO8601, toDateObject } from "@/lib/date-utils";
+import { getMDXComponents } from "@/lib/mdx-components";
+import { blogSource } from "@/lib/source";
 import { ImageZoom } from "fumadocs-ui/components/image-zoom";
-import defaultMdxComponents from "fumadocs-ui/mdx";
 import { DocsBody, DocsDescription, DocsPage, DocsTitle } from "fumadocs-ui/page";
 import { notFound } from "next/navigation";
 
@@ -35,10 +35,9 @@ export default async function Page(props: { params: Promise<{ slug?: string[] }>
       </div>
       <DocsBody>
         <Mdx
-          components={{
-            ...defaultMdxComponents,
+          components={getMDXComponents({
             img: (props) => <ImageZoom {...(props as any)} />,
-          }}
+          })}
         />
       </DocsBody>
     </DocsPage>

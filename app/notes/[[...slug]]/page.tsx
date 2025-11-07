@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { notesSource } from "@/lib/source";
 import { formatDate, formatISO8601, toDateObject } from "@/lib/date-utils";
+import { getMDXComponents } from "@/lib/mdx-components";
+import { notesSource } from "@/lib/source";
 import { ImageZoom } from "fumadocs-ui/components/image-zoom";
-import defaultMdxComponents from "fumadocs-ui/mdx";
+import { createRelativeLink } from "fumadocs-ui/mdx";
 import { DocsBody, DocsDescription, DocsPage, DocsTitle } from "fumadocs-ui/page";
 import { notFound } from "next/navigation";
 
@@ -45,10 +46,11 @@ export default async function Page(props: { params: Promise<{ slug?: string[] }>
       {dateDisplay}
       <DocsBody>
         <Mdx
-          components={{
-            ...defaultMdxComponents,
+          components={getMDXComponents({
             img: (props) => <ImageZoom {...(props as any)} />,
-          }}
+            // this allows you to link to other pages with relative file paths
+            a: createRelativeLink(notesSource, page),
+          })}
         />
       </DocsBody>
     </DocsPage>
