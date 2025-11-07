@@ -7,7 +7,7 @@ export function Provider({ children }: { children: ReactNode }) {
     <RootProvider
       search={{
         links: [
-          ["Knowledge Base", "/notes"],
+          ["Notes", "/notes"],
           ["Blog", "/blog"],
         ],
         options: { type: "static" },
