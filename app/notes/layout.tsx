@@ -1,13 +1,13 @@
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
 import type { ReactNode } from "react";
 import { baseOptions } from "@/app/layout.config";
-import { kbSource } from "@/lib/source";
+import { notesSource } from "@/lib/source";
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
     <DocsLayout
       {...baseOptions}
-      tree={kbSource.pageTree}
+      tree={notesSource.pageTree}
       sidebar={{
         defaultOpenLevel: 2,
       }}

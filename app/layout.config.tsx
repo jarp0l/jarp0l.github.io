@@ -6,7 +6,7 @@ import { Library, NotebookPen } from "lucide-react";
  *
  * you can customise layouts individually from:
  * Home Layout: app/(home)/layout.tsx
- * Docs Layout: app/kb/layout.tsx
+ * Docs Layout: app/notes/layout.tsx
  */
 export const baseOptions: BaseLayoutProps = {
   nav: {
@@ -27,8 +27,8 @@ export const baseOptions: BaseLayoutProps = {
   links: [
     {
       icon: <Library />,
-      text: "Knowledge Base",
-      url: "/kb",
+      text: "Notes",
+      url: "/notes",
       active: "nested-url",
     },
     {

@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { blogSource } from "@/lib/source";
+import { formatDate, formatISO8601, toDateObject } from "@/lib/date-utils";
 import { ImageZoom } from "fumadocs-ui/components/image-zoom";
 import defaultMdxComponents from "fumadocs-ui/mdx";
 import { DocsBody, DocsDescription, DocsPage, DocsTitle } from "fumadocs-ui/page";
@@ -13,22 +14,7 @@ export default async function Page(props: { params: Promise<{ slug?: string[] }>
 
   const { body: Mdx, toc, date, lastModified } = page.data;
 
-  // Convert date string to Date object
-  const dateObj = typeof date === "string" ? new Date(date) : date;
-
-  // Format date as "Tue, April 1, 2025"
-  const formatDate = (date: Date) => {
-    return new Intl.DateTimeFormat("en-US", {
-      weekday: "short",
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-    }).format(date);
-  };
-
-  // Format date as ISO 8601 string
-  const formatISO8601 = (date: Date) => date.toISOString();
-
+  const dateObj = toDateObject(date);
   const formattedDate = formatDate(dateObj);
   const isoDate = formatISO8601(dateObj);
 

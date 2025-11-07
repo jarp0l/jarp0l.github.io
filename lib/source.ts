@@ -1,9 +1,9 @@
-import { blog, kb } from "@/.source";
+import { blog, notes } from "@/.source";
 import { loader } from "fumadocs-core/source";
 
-export const kbSource = loader({
-  baseUrl: "/kb",
-  source: kb.toFumadocsSource(),
+export const  notesSource = loader({
+  baseUrl: "/notes",
+  source:  notes.toFumadocsSource(),
 });
 
 export const blogSource = loader({

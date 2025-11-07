@@ -1,10 +1,10 @@
-import { kbSource, blogSource } from "@/lib/source";
+import { notesSource, blogSource } from "@/lib/source";
 import { createSearchAPI } from "fumadocs-core/search/server";
 
 export const revalidate = false;
 
 export const { staticGET: GET } = createSearchAPI("advanced", {
-  indexes: [...kbSource.getPages(), ...blogSource.getPages()].map((page) => ({
+  indexes: [...notesSource.getPages(), ...blogSource.getPages()].map((page) => ({
     title: page.data.title,
     description: page.data.description,
     url: page.url,
