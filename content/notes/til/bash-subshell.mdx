@@ -1,0 +1,118 @@
+---
+title: Bash - Subshell
+date: 2025-11-07
+---
+
+## What is a Subshell?
+
+- A child process that inherits the parent shell's environment but runs independently
+- The parentheses `( )` create a subshell
+- Changes in the subshell (directory, variables, etc.) don't affect the parent shell
+- When the subshell exits, parent remains unchanged
+
+### Syntax
+
+```bash
+# Subshell - uses parentheses ( )
+(commands)
+
+# Regular execution - no parentheses
+commands
+```
+
+### Examples
+
+```bash
+# Changes are isolated - parent unchanged
+pwd                          # /home/user
+(cd /tmp && pwd)             # /tmp
+pwd                          # /home/user
+
+VAR="parent"
+(VAR="child" && echo $VAR)   # Prints: child
+echo $VAR                    # Prints: parent
+
+# Exit doesn't kill parent
+(exit 1)
+echo "Still running"         # This runs
+```
+
+## Common Uses
+
+### 1. Temporary directory change
+
+```bash
+for dir in dir1 dir2 dir3; do
+  (cd "$dir" && make build)
+done
+# Still in original directory
+```
+
+### 2. Temporary environment changes
+
+```bash
+(
+  export DATABASE_URL="postgresql://user:password@localhost:5432/mydb"
+  ./run_migration.sh
+)
+# Original DATABASE_URL still active
+```
+
+### 3. Pipe multiple commands
+
+```bash
+(echo "Line 1"; echo "Line 2"; echo "Line 3") | grep "2"
+```
+
+### 4. Background job grouping
+
+```bash
+(prepare && process && cleanup) &
+```
+
+### 5. Isolated error handling
+
+```bash
+(
+  set -e
+  risky_command
+)
+# Parent continues even if subshell failed
+```
+
+## vs Curly Braces `{ }`
+
+```bash
+# Subshell - isolated (changes DON'T persist)
+VAR=1
+(VAR=2)
+echo $VAR    # 1 (unchanged)
+
+# Curly braces - NOT isolated (changes persist)
+VAR=1
+{ VAR=2; }
+echo $VAR    # 2 (changed!)
+
+# Gotcha: Use curly braces when you need changes to persist
+(COUNT=5)
+echo $COUNT  # Empty!
+
+{ COUNT=5; }
+echo $COUNT  # 5
+```
+
+## Quick Reference
+
+```bash
+(command)                    # Subshell
+{ command; }                 # Curly braces (not isolated)
+result=$(command)            # Command substitution (also subshell)
+(command) &                  # Background subshell
+(cmd1; cmd2; cmd3) | grep    # Pipe from grouped commands
+```
+
+## Further Reading
+
+- [Bash Reference Manual](https://www.gnu.org/software/bash/manual/) -
+  [Section 3.7.3](https://www.gnu.org/software/bash/manual/html_node/Command-Execution-Environment.html)
+  "Command Execution Environment"
